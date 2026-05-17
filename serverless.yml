@@ -1,0 +1,27 @@
+service: laravel-messaging-saas
+
+provider:
+  name: aws
+  region: us-east-1 # الإقليم السحابي
+  runtime: php-81-fpm # إصدار الـ PHP المتوافق مع حزمة Bref
+
+plugins:
+  - ./vendor/bref/bref # استدعاء حزمة بريف الأساسية
+
+functions:
+  # دالة تشغيل واجهات الموقع والـ Routes
+  web:
+    handler: public/index.php
+    timeout: 28 # الثواني المتاحة لانتهاء الطلب
+    layers:
+      - ${bref:layer.php-81-fpm}
+    events:
+      - httpApi: '*'
+
+  # دالة تشغيل أوامر الـ Artisan (مثل الـ Migrate)
+  artisan:
+    handler: artisan
+    timeout: 120 # وقت أطول لأوامر قواعد البيانات
+    layers:
+      - ${bref:layer.php-81}
+      - ${bref:layer.console}
